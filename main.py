@@ -1,29 +1,32 @@
-# Copyright (C) @TheSmartBisnu
-# Channel: https://t.me/itsSmartDev
-
 import os
+from threading import Thread
+from flask import Flask
 from time import time
-from pyleaves import Leaves
+from pyrogram import Client, filters
 from pyrogram.types import Message
-from pyrogram import Client, filters, enums
 from pyrogram.errors import PeerIdInvalid
 
 from helpers.utils import (
     processMediaGroup,
     get_parsed_msg,
-    PROGRESS_BAR,
     fileSizeLimit,
     getChatMsgID,
     progressArgs,
     send_media
 )
-
 from config import (
     API_ID,
     API_HASH,
     BOT_TOKEN,
     SESSION_STRING
 )
+
+# Flask app for health checks
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return 'Bot is running!'
 
 # Initialize the bot client
 bot = Client(
@@ -43,7 +46,7 @@ user = Client(
 async def start(bot, message: Message):
     welcome_text = (
         "**👋 Welcome to the Media Downloader Bot!**\n\n"
-        "This bot helps you download media from Restricted channel\n"
+        "This bot helps you download media from restricted channels.\n"
         "Use /help for more information on how to use this bot."
     )
     await message.reply(welcome_text)
@@ -53,7 +56,7 @@ async def help_command(bot, message: Message):
     help_text = (
         "💡 **How to Use the Bot**\n\n"
         "1. Send the command `/dl post URL` to download media from a specific message.\n"
-        "2. The bot will download the media (photos, videos, audio, or documents) also can copy message.\n"
+        "2. The bot will download the media (photos, videos, audio, or documents) also can copy messages.\n"
         "3. Make sure the bot and the user client are part of the chat to download the media.\n\n"
         "**Example**: `/dl https://t.me/channelname/123`"
     )
@@ -112,6 +115,11 @@ async def download_media(bot, message: Message):
         error_message = f"Failed to download the media: {str(e)}"
         await message.reply(error_message)
 
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+
 if __name__ == "__main__":
     user.start()
+    # Run the Flask server in a separate thread
+    Thread(target=run_flask).start()
     bot.run()
