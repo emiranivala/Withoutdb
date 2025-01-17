@@ -1,0 +1,4 @@
+pyrogram==2.0.0
+pyleaves==1.1.4
+flask==2.1.1
+python-dotenv==0.19.2
